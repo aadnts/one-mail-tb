@@ -1,11 +1,11 @@
-import { Typography } from '@neo4j-ndl/react'; // Assurez-vous d'importer le composant Button
 import React, { useState } from 'react';
 import CustomModal from '../../../HOC/CustomModal';
 import { S3ModalProps } from '../../../types';
 import { buttonCaptions } from '../../../utils/Constants';
+import { Typography } from '@neo4j-ndl/react';
 
 const GmailModal: React.FC<S3ModalProps> = ({ hideModal, open }) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // État pour gérer le fichier sélectionné
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'unknown' | 'success' | 'info' | 'warning' | 'danger'>('unknown');
   const [statusMessage, setStatusMessage] = useState<string>('');
 
@@ -14,40 +14,51 @@ const GmailModal: React.FC<S3ModalProps> = ({ hideModal, open }) => {
     setSelectedFile(file);
   };
 
-  const submitHandler = async () => {
+  const uploadFile = async () => {
     if (selectedFile) {
       const formData = new FormData();
       formData.append('file', selectedFile);
 
       try {
-        const response = await fetch('http://104.248.236.94:5000/upload', {
+        const response = await fetch('http://104.248.236.94:5000/upload_credentials', {
           method: 'POST',
           body: formData,
         });
 
+        const responseBody = await response.json();
+
+        console.log('Response status:', response.status);
+        console.log('Response body:', responseBody);
+
         if (response.ok) {
-          setStatus('success');
-          setStatusMessage(`Fichier ${selectedFile.name} chargé avec succès`);
+          console.log('File uploaded successfully');
+          authenticateWithGoogle();
         } else {
+          console.error('Error uploading file:', responseBody);
           setStatus('danger');
-          setStatusMessage('Erreur lors du chargement du fichier');
+          setStatusMessage(`Error uploading file: ${responseBody.error}`);
         }
       } catch (error) {
-        console.error('Erreur:', error);
+        console.error('Error:', error);
         setStatus('danger');
-        setStatusMessage('Erreur lors du chargement du fichier');
+        setStatusMessage('Error uploading file');
       }
     } else {
       setStatus('warning');
-      setStatusMessage('Veuillez sélectionner un fichier avant de soumettre');
+      setStatusMessage('Please select a file before submitting');
     }
+  };
 
-    setTimeout(() => {
-      hideModal();
-      setStatus('unknown');
-      setStatusMessage('');
-      setSelectedFile(null);
-    }, 3000);
+  const authenticateWithGoogle = async () => {
+    try {
+      const response = await fetch('http://104.248.236.94:5000/generate_token');
+      const data = await response.json();
+      window.location.href = data.authorization_url;
+    } catch (error) {
+      console.error('Error during authentication:', error);
+      setStatus('danger');
+      setStatusMessage('Error during authentication');
+    }
   };
 
   const onClose = () => {
@@ -62,7 +73,7 @@ const GmailModal: React.FC<S3ModalProps> = ({ hideModal, open }) => {
       open={open}
       onClose={onClose}
       statusMessage={statusMessage}
-      submitHandler={submitHandler}
+      submitHandler={uploadFile}
       status={status}
       setStatus={setStatus}
       submitLabel={buttonCaptions.submit}
