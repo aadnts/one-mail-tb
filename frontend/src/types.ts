@@ -175,6 +175,7 @@ export interface CustomModalProps {
   statusMessage: string;
   status: 'unknown' | 'success' | 'info' | 'warning' | 'danger';
   setStatus: Dispatch<SetStateAction<'unknown' | 'success' | 'info' | 'warning' | 'danger'>>;
+  isLoading: boolean;
 }
 
 export interface CustomInput {

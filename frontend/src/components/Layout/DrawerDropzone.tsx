@@ -14,6 +14,8 @@ import GenericButton from '../WebSources/GenericSourceButton';
 import GenericModal from '../WebSources/GenericSourceModal';
 import GmailComponent from '../DataSources/Gmail/GmailBucket';
 import GmailModal from '../DataSources/Gmail/GmailModal';
+import OCRComponent from '../DataSources/OCR/OCRBucket';
+import OCRModal from '../DataSources/OCR/OCRModal';
 
 const DrawerDropzone: React.FC<DrawerProps> = ({ isExpanded }) => {
   const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
@@ -22,6 +24,7 @@ const DrawerDropzone: React.FC<DrawerProps> = ({ isExpanded }) => {
   const [showGenericModal, setshowGenericModal] = useState<boolean>(false);
   const { closeAlert, alertState } = useAlertContext();
   const [showGmailModal, setshowGmailModal] = useState<boolean>(false);
+  const [showOCRModal, setshowOCRModal] = useState<boolean>(false);
 
   useEffect(() => {
     async function getHealthStatus() {
@@ -58,6 +61,12 @@ const DrawerDropzone: React.FC<DrawerProps> = ({ isExpanded }) => {
   }, []);
   const hideGmailModal = useCallback(() => {
     setshowGmailModal(false);
+  }, []);
+  const openOCRModal = useCallback(() => {
+    setshowOCRModal(true);
+  }, []);
+  const hideOCRModal = useCallback(() => {
+    setshowOCRModal(false);
   }, []);
 
   const isYoutubeOnlyCheck = useMemo(
@@ -127,12 +136,7 @@ const DrawerDropzone: React.FC<DrawerProps> = ({ isExpanded }) => {
                               ></GenericModal>
                             </div>
                           )}
-                          {APP_SOURCES.includes('s3') && (
-                            <div className={`outline-dashed imageBg ${process.env.ENV === 'PROD' ? 'w-[245px]' : ''}`}>
-                              <S3Component openModal={openModal} />
-                              <S3Modal hideModal={hideModal} open={showModal} />{' '}
-                            </div>
-                          )}
+                          
                           {APP_SOURCES.includes('gcs') && (
                             <div className={`outline-dashed imageBg ${process.env.ENV === 'PROD' ? 'w-[245px]' : ''}`}>
                               <GCSButton openModal={openGCSModal} />
@@ -142,6 +146,10 @@ const DrawerDropzone: React.FC<DrawerProps> = ({ isExpanded }) => {
                           <div className={`outline-dashed imageBg ${process.env.ENV === 'PROD' ? 'w-[245px]' : ''}`}>
                               <GmailComponent openModal={openGmailModal} />
                               <GmailModal hideModal={hideGmailModal} open={showGmailModal} />{' '}
+                          </div>
+                          <div className={`outline-dashed imageBg ${process.env.ENV === 'PROD' ? 'w-[245px]' : ''}`}>
+                              <OCRComponent openModal={openOCRModal} />
+                              <OCRModal hideModal={hideOCRModal} open={showOCRModal} />{' '}
                           </div>
                         </>
                       ) : (

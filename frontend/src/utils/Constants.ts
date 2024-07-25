@@ -156,7 +156,8 @@ export const buttonCaptions = {
   continueSettings: 'Continue',
   clearSettings: 'Clear Settings',
   ask: 'Ask',
-  gmail: 'Gmail integration'
+  gmail: 'Gmail integration',
+  OCR: 'Images and scans'
 };
 
 export const taskParam: string[] = ['update_similarity_graph', 'create_fulltext_index', 'create_entity_embedding'];

@@ -12,6 +12,7 @@ server_url = os.getenv("SERVER_URL")
 
 # Define the folder, model, and chunk size
 directory_path = "/root/one-mail-tb/gmail/threads"
+ocr_directory_path = "/root/one-mail-tb/gmail/ocr"
 chunk_size = 5 * 1024 * 1024  # 5 MB
 model = "openai-gpt-4o-mini"
 uri = os.getenv("NEO4J_URI")
@@ -142,5 +143,49 @@ def send_emails():
     with open("/root/one-mail-tb/gmail/new_emails", "w") as fr:
         fr.write("")
 
+# Function to process files within OCR directory
+def process_files_in_ocr_directory(ocr_directory_path, ocr_model):
+    for root, _, files in os.walk(ocr_directory_path):
+        for file_name in files:
+            file_path = os.path.join(root, file_name)
+            if file_path.lower().endswith(('.jpg', '.png', '.pdf')):
+                print(f"Processing OCR for file: {file_path}")
+                ocr_text = process_pdf_or_image(file_path, ocr_model)
+                if ocr_text:
+                    txt_file_path = file_path.rsplit('.', 1)[0].replace(" ", "_") + ".txt"
+                    with open(txt_file_path, "w") as txt_file:
+                        txt_file.write(ocr_text)
+                    os.remove(file_path)
+                    print(f"Created {txt_file_path} and removed original file {file_path}")
+                else:
+                    print(f"No text extracted from {file_path}")
+
+def send_files():
+    # Process all files in the OCR directory
+    process_files_in_ocr_directory(ocr_directory_path, ocr_model)
+    
+    for file_name in os.listdir(ocr_directory_path):
+        file_path = os.path.join(ocr_directory_path, file_name)
+        if os.path.isfile(file_path) and file_path.endswith(".txt"):
+            print(f"Uploading and processing file: {file_path}")
+            if upload_file_in_chunks(file_path, server_url, model, uri, username, password, database):
+                print("File uploaded successfully.")
+                
+                # Wait for a sufficient amount of time to ensure the server has time to merge the file
+                sleep(20)
+                
+                # Extract nodes and relations
+                extraction_response = extract_nodes_and_relations(server_url, model, uri, username, password, database, os.path.basename(file_path))
+                if extraction_response:
+                    print("Extraction response:", extraction_response)
+                    # Remove the .txt file after extraction
+                    os.remove(file_path)
+                    print(f"Removed processed text file: {file_path}")
+                else:
+                    print("Extraction failed.")
+            else:
+                print("File upload failed.")
+
 if __name__ == "__main__":
     send_emails()
+    send_files()

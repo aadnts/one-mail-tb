@@ -11,8 +11,9 @@ const CustomModal: React.FC<CustomModalProps> = ({
   statusMessage,
   status,
   setStatus,
+  isLoading
 }) => {
-  const isDisabled = status === 'danger' || status === 'info' || status === 'warning' || status === 'success';
+  const isDisabled = isLoading || status === 'danger' || status === 'info' || status === 'warning' || status === 'success';
   return (
     <Dialog
       size='small'
@@ -35,7 +36,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
         <div className='n-flex n-flex-row n-flex-wrap'>{children}</div>
         <Dialog.Actions className='mt-4'>
           <Button onClick={submitHandler} size='medium' disabled={isDisabled}>
-            {submitLabel}
+            {isLoading ? 'Loading...' : submitLabel}
           </Button>
         </Dialog.Actions>
       </Dialog.Content>
