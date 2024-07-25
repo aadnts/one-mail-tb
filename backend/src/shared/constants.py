@@ -5,6 +5,7 @@ MODEL_VERSIONS = {
         "openai-gpt-4": "gpt-4-0125-preview",
         "diffbot" : "gpt-4o",
         "openai-gpt-4o":"gpt-4o",
+        "openai-gpt-4o-mini":"gpt-4o-mini",        
         "groq-llama3" : "llama3-70b-8192"
          }
 OPENAI_MODELS = ["openai-gpt-3.5", "openai-gpt-4o"]

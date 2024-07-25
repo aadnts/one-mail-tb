@@ -55,12 +55,6 @@ class RetrieveEmail:
             print(f"An error occurred: {error}")
             return None
 
-    def create_thread_folder(self, thread_id):
-        thread_folder_path = os.path.join(self.THREADS_FOLDER_PATH, thread_id)
-        if not os.path.exists(thread_folder_path):
-            os.makedirs(thread_folder_path)
-        return thread_folder_path
-
     def create_email_folder(self, thread_folder_path, messageId):
         email_folder_path = os.path.join(thread_folder_path, messageId)
         if not os.path.exists(email_folder_path):
@@ -133,7 +127,7 @@ class RetrieveEmail:
             email_message = self.remove_previous_conversations(email_message)
 
             # Create or update the thread folder
-            thread_folder_path = self.create_thread_folder(thread_id)
+            thread_folder_path = self.THREADS_FOLDER_PATH
 
             # Create a folder for the email inside the thread folder
             email_folder_path = self.create_email_folder(

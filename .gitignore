@@ -4,6 +4,16 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+venv
+.env
+.gmailvenv
+credentials.json
+./token.pickle
+__pycache__
+token*
+*.pickle
+neo4j_db/
+
 # C extensions
 *.so
 /backend/graph

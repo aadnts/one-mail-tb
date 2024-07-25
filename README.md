@@ -2,6 +2,28 @@
 
 Creating knowledge graphs from unstructured data
 
+# Commands
+
+- backend
+```bash
+uvicorn score:app --log-level debug --host 0.0.0.0 (.venv)
+```
+- frontend
+```bash
+yarn run dev
+```
+- neo4j
+```bash
+neo4j start
+```
+- CRON
+```bash
+python3 cron.py (.gmailvenv)
+```
+- Flask
+```bash
+python3 upload_file.py (.gmailvenv)
+```
 
 # LLM Graph Builder
 

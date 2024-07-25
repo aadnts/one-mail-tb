@@ -12,6 +12,8 @@ import { useAlertContext } from '../../context/Alert';
 import { APP_SOURCES } from '../../utils/Constants';
 import GenericButton from '../WebSources/GenericSourceButton';
 import GenericModal from '../WebSources/GenericSourceModal';
+import GmailComponent from '../DataSources/Gmail/GmailBucket';
+import GmailModal from '../DataSources/Gmail/GmailModal';
 
 const DrawerDropzone: React.FC<DrawerProps> = ({ isExpanded }) => {
   const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
@@ -19,6 +21,7 @@ const DrawerDropzone: React.FC<DrawerProps> = ({ isExpanded }) => {
   const [showGCSModal, setShowGCSModal] = useState<boolean>(false);
   const [showGenericModal, setshowGenericModal] = useState<boolean>(false);
   const { closeAlert, alertState } = useAlertContext();
+  const [showGmailModal, setshowGmailModal] = useState<boolean>(false);
 
   useEffect(() => {
     async function getHealthStatus() {
@@ -49,6 +52,12 @@ const DrawerDropzone: React.FC<DrawerProps> = ({ isExpanded }) => {
   }, []);
   const closeGenericModal = useCallback(() => {
     setshowGenericModal(false);
+  }, []);
+  const openGmailModal = useCallback(() => {
+    setshowGmailModal(true);
+  }, []);
+  const hideGmailModal = useCallback(() => {
+    setshowGmailModal(false);
   }, []);
 
   const isYoutubeOnlyCheck = useMemo(
@@ -130,6 +139,10 @@ const DrawerDropzone: React.FC<DrawerProps> = ({ isExpanded }) => {
                               <GCSModal openGCSModal={openGCSModal} open={showGCSModal} hideModal={hideGCSModal} />
                             </div>
                           )}
+                          <div className={`outline-dashed imageBg ${process.env.ENV === 'PROD' ? 'w-[245px]' : ''}`}>
+                              <GmailComponent openModal={openGmailModal} />
+                              <GmailModal hideModal={hideGmailModal} open={showGmailModal} />{' '}
+                          </div>
                         </>
                       ) : (
                         <></>

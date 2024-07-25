@@ -39,6 +39,7 @@ export const llms =
         'diffbot',
         'openai-gpt-3.5',
         'openai-gpt-4o',
+        'openai-gpt-4o-mini',
         'gemini-1.0-pro',
         'gemini-1.5-pro',
         'azure_ai_gpt_35',
@@ -155,6 +156,7 @@ export const buttonCaptions = {
   continueSettings: 'Continue',
   clearSettings: 'Clear Settings',
   ask: 'Ask',
+  gmail: 'Gmail integration'
 };
 
 export const taskParam: string[] = ['update_similarity_graph', 'create_fulltext_index', 'create_entity_embedding'];
