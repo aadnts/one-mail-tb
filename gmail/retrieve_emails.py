@@ -3,6 +3,7 @@ import base64
 import json
 import pickle
 from datetime import datetime
+import string
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -107,6 +108,8 @@ class RetrieveEmail:
             }
             from_email = self.extract_sender_email(headers.get("From", ""))
             subject = self.extract_subject(headers.get("Subject", ""))
+            subject = subject.translate(str.maketrans('', '', string.punctuation))
+            subject = subject.replace(' ', '_')
             
             # Access labelIds directly from message
             labels = message.get("labelIds", [])
@@ -192,14 +195,14 @@ class RetrieveEmail:
     def remove_previous_conversations(self, email_message):
         """Removes previous conversations from the email message."""
         # Regular expression to detect lines indicating previous email content
-        previous_email_pattern_fr = re.compile(r"(-{2,}|De :|Envoyé :|À :|Objet :)")
+        # previous_email_pattern_fr = re.compile(r"(-{2,}|De :|Envoyé :|À :|Objet :)")
 
         lines = email_message.split("\n")
         new_lines = []
 
         for line in lines:
-            if previous_email_pattern_fr.match(line):
-                break
+            # if previous_email_pattern_fr.match(line):
+            #     break
             new_lines.append(line)
 
         return "\n".join(new_lines)
@@ -224,7 +227,7 @@ class RetrieveEmail:
 
     def retrieve_emails(self):
         threads_metadata = self.load_threads_metadata()
-        threads = self.get_threads(max_results=30)  # Retrieve the 30 latest threads
+        threads = self.get_threads(max_results=60)  # Retrieve the 30 latest threads
 
         if threads:
             for thread in threads:

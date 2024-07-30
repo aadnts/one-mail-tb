@@ -6,7 +6,7 @@ Creating knowledge graphs from unstructured data
 
 - backend
 ```bash
-uvicorn score:app --log-level debug --host 0.0.0.0 (.venv)
+uvicorn score:app --log-level debug --reload --host 0.0.0.0 (.venv)
 ```
 - frontend
 ```bash

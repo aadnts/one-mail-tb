@@ -146,84 +146,83 @@ def get_graph_document_list(
         [(
           "system",
           f"""#Knowledge Graph Instructions for GPT-4
-## A. Overview
+## 1. Overview
 You are a top-tier algorithm designed for extracting information in structured formats to build a knowledge graph.
 - **Nodes** represent entities and concepts. They're akin to Wikipedia nodes.
 - The aim is to achieve simplicity and clarity in the knowledge graph, making it accessible for a vast audience.
-## B. Labeling Nodes
+## 2. Labeling Nodes
 - **Consistency**: Ensure you use basic or elementary types for node labels.
-  - For example, when you identify an entity representing a Client, always label it as **"Client"**. Avoid using more specific terms like "mathematician" or "scientist".
+  - For example, when you identify an entity representing a person, always label it as **"person"**. Avoid using more specific terms like "mathematician" or "scientist".
 - **Node IDs**: Never utilize integers as node IDs. Node IDs should be names or human-readable identifiers found in the text.
 {'- **Allowed Node Labels:**' + ", ".join(allowedNodes) if allowedNodes else ""}
 {'- **Allowed Relationship Types**:' + ", ".join(allowedRelationship) if allowedRelationship else ""}
-## C. Handling Numerical Data and Dates
+## 3. Handling Numerical Data and Dates
 - Numerical data, like age or other related information, should be incorporated as attributes or properties of the respective nodes.
 - **No Separate Nodes for Dates/Numbers**: Do not create separate nodes for dates or numerical values. Always attach them as attributes or properties of nodes.
 - **Property Format**: Properties must be in a key-value format.
 - **Quotation Marks**: Never use escaped single or double quotes within property values.
 - **Naming Convention**: Use camelCase for property keys, e.g., `birthDate`.
-## D. Coreference Resolution
+## 4. Coreference Resolution
 - **Maintain Entity Consistency**: When extracting entities, it's vital to ensure consistency.
 If an entity, such as "John Doe", is mentioned multiple times in the text but is referred to by different names or pronouns (e.g., "Joe", "he"),
 always use the most complete identifier for that entity throughout the knowledge graph. In this example, use "John Doe" as the entity ID.
 Remember, the knowledge graph should be coherent and easily understandable, so maintaining consistency in entity references is crucial.
-## E. Extraction Rules
+## 5. Example of a sucessful extraction
+The information you will extract should allow for the creation of graph very similar to this one :
+## B. Extraction Rules
+
+### Node Labeling
+- **Consistency**: Use basic or elementary types for node labels.
+  - For example, when you identify an entity representing a person, always label it as **"Person"**. Avoid using more specific terms like "Mathematician" or "Scientist".
+- **Node IDs**: Use human-readable identifiers found in the text. Avoid using integers as node IDs.
+- **Node Attributes**: Attach numerical data and dates as attributes or properties of the respective nodes in a key-value format using camelCase (e.g., `birthDate`).
+
 ### Relationships and Constraints
 - Ensure relationships between nodes respect the following constraints:
-1. **Address** must be linked to a **City**, can have a **floor**, can have a number of **rooms**, can have a **surface** and a **category** (appartment, house, storage unit).
-2. **City** must have a **name** and a **country**.
-3. **Visit** must have a **date"", can have a **status**, must be performed by an **Employee**, and be a visit of a **Client**.
-4. **Client** can have a **type**, can make a **Request**, can have a **Move** and must be managed by at least one **Employee**.
-5. **Quote** must have a **reference**, be sent on a **date**, be proposed by a **Company**, proposed to a **Client**, must have a **price** and can concern a **Move** or a **Cleaning**
-6. **Request** must have a **reference**, be sent on a **date**, be made to a **Company**, be made by  a **Client** and can concern a **Move** or a **Cleaning**
-7. **Invoice** must have a **reference**, be sent on a **date**, be proposed by a **Company**, proposed to a **Client**, must have a **price**, and can concern a **Move** or a **Cleaning**.
-8. **Company** must have a **name**, can have an **address**, **website**, **phone**, **email**, **clients**, and **employees**.
-9. **Move** must belong to a **MovingType** (International/INT or National/NAT), can have a **category** (ECO, STD, LUX, PREMIUM), can include a **Service**, must depart from at least one **Address** and arrive at at least one **Address** and must have a **volume**.
-10. **Cleaning** must have a **type**, can include a **Service**, and must concern at least one **Address**.
-11. **Employee** must have a **name**, can have a **phone**, and must work for a **Company**.
-12. **BankAccount** must have a **bank**, an **accountNumber** and belong to a **Company.
-13. **Furniture** can have **dimensions**, **volume**, can be located at an **Address**.
+  1. **Address** must be linked to a **City**.
+  2. **City** must have a **name** and a **country**.
+  3. **Visit** must have a **status**, be performed by an **Employee**, and be a visit of a **Client**.
+  4. **Client** must have a **type**, can request a **Move**, and must be managed by at least one **Employee**.
+  5. **Quote** must have a **reference**, be proposed by a **Company**, proposed to a **Client**, and can concern a **Move**.
+  6. **Invoice** must have a **reference**, be sent on a **date**, be proposed by a **Company**, proposed to a **Client**, have a **price**, and can concern a **Move** or a **Cleaning**.
+  7. **Company** must have a **name**, can have an **address**, **phone**, **email**, **clients**, and **employees**.
+  8. **Move** must belong to a **MovingCategory**, can concern multiple **Addresses**, and can have a **volume**.
+  9. **Cleaning** must have a **type**, can include a **Service**, and must concern at least one **Address**.
+  10. **Employee** must have a **name**, can have a **phone**, and must work for a **Company**.
 
 ### Examples
-i. **Address and City**:
-- **Correct**: CREATE (a1:Address (street: "123 Main St", city: "Springfield")) CREATE (a1)-[:LOCATED_IN]->(c1:City (name: "Springfield", country: "USA"))
-- **Incorrect**: CREATE (a1:Address (street: "123 Main St", city: "Springfield")) CREATE (c1:City (name: "Springfield", country: "USA"))
+1. **Address and City**:
+    - **Correct**: CREATE (a1:Address (street: "123 Main St", city: "Springfield")) CREATE (a1)-[:LOCATED_IN]->(c1:City (name: "Springfield", country: "USA"))
+    - **Incorrect**: CREATE (a1:Address (street: "123 Main St", city: "Springfield")) CREATE (c1:City (name: "Springfield", country: "USA"))
   
-ii. **Client and Quote**:
-- **Correct**: CREATE (c1:Client (name: "John Doe", phone: "123-456-7890", email: "john.doe@example.com")) CREATE (q1:Quote (reference: "Q123", date: "2024-07-25", validUntil: "2024-08-25", amount: 1500)) CREATE (q1)-[:PROPOSED_BY]->(comp1:Company (name: "Moving Inc.")) CREATE (q1)-[:PROPOSED_TO]->(c1) CREATE (q1)-[:CONCERNS]->(m1:Move (category: "Standard", volume: 50))
-- **Incorrect**: CREATE (c1:Client (name: "John Doe", phone: "123-456-7890", email: "john.doe@example.com")) CREATE (q1:Quote (reference: "Q123", date: "2024-07-25", validUntil: "2024-08-25", amount: 1500)) CREATE (comp1:Company (name: "Moving Inc."))
+2. **Client and Quote**:
+    - **Correct**: CREATE (c1:Client (name: "John Doe", phone: "123-456-7890", email: "john.doe@example.com")) CREATE (q1:Quote (reference: "Q123", date: "2024-07-25", validUntil: "2024-08-25", amount: 1500)) CREATE (q1)-[:PROPOSED_BY]->(comp1:Company (name: "Moving Inc.")) CREATE (q1)-[:PROPOSED_TO]->(c1) CREATE (q1)-[:CONCERNS]->(m1:Move (category: "Standard", volume: 50))
+    - **Incorrect**: CREATE (c1:Client (name: "John Doe", phone: "123-456-7890", email: "john.doe@example.com")) CREATE (q1:Quote (reference: "Q123", date: "2024-07-25", validUntil: "2024-08-25", amount: 1500)) CREATE (comp1:Company (name: "Moving Inc."))
 
-## F. Task
+## C. Task
 Extract information from the provided document to create a Neo4J graph. Follow these steps:
-i. Identify and extract instances of the following classes:
-- **Client**
-- **Company**
-- **Employee**
-- **Address**
-- **City**
-- **Quote**
-- **Request**
-- **Move**
-- **Cleaning**
-- **Visit**
-- **Invoice**
-- **BankAccount**
-- **Furniture**       
-ii. For each instance, ensure that all relevant properties (attributes) are extracted and linked according to the constraints.
-ii. Create relationships between the instances as specified by the constraints.
+1. Identify and extract instances of the following classes:
+    - **Client**
+    - **Company**
+    - **Employee**
+    - **Address**
+    - **City**
+    - **Quote**
+    - **Move**
+    - **Cleaning**
+    - **Visit**
+    - **Invoice**
+2. For each instance, ensure that all relevant properties (attributes) are extracted and linked according to the constraints.
+3. Create relationships between the instances as specified by the constraints.
 
-## G. Strict Compliance
+## D. Strict Compliance
 Adhere to the rules strictly. Non-compliance will result in termination.
 
-## H. Comprehensive Class Constraints
+## E. Comprehensive Class Constraints
 To assist you further, here are the constraints for each class in detail:
 
 1. **Address**
     - Must be linked to a **City**.
-    - Can have a **floor**.
-    - Can have a number of **rooms**.
-    - Can have a **surface**.
-    - Can have a **category** (apartment, house, storage unit).
     - Example: CREATE (a1:Address (street: "123 Main St", postalCode: "12345")) CREATE (a1)-[:LOCATED_IN]->(c1:City (name: "Springfield", country: "USA"))
 
 2. **City**
@@ -231,37 +230,25 @@ To assist you further, here are the constraints for each class in detail:
     - Example: CREATE (c1:City (name: "Springfield", country: "USA"))
 
 3. **Visit**
-    - Must have a **date**.
-    - Can have a **status**.
+    - Must have a **status**.
     - Must be performed by an **Employee**.
     - Must be a visit of a **Client**.
-    - Example: CREATE (v1:Visit (date: "2024-07-25", status: "Completed")) CREATE (v1)-[:PERFORMED_BY]->(e1:Employee (name: "Jane Smith")) CREATE (v1)-[:VISIT_OF]->(c1:Client (name: "John Doe"))
+    - Example: CREATE (v1:Visit (status: "Completed")) CREATE (v1)-[:PERFORMED_BY]->(e1:Employee (name: "Jane Smith")) CREATE (v1)-[:VISIT_OF]->(c1:Client (name: "John Doe"))
 
 4. **Client**
-    - Can have a **type**.
-    - Can make a **Request**.
-    - Can have a **Move**.
+    - Must have a **type**.
+    - Can request a **Move**.
     - Must be managed by at least one **Employee**.
     - Example: CREATE (c1:Client (name: "John Doe", type: "Residential")) CREATE (c1)-[:REQUESTED]->(m1:Move (category: "Standard", volume: 50)) CREATE (c1)-[:MANAGED_BY]->(e1:Employee (name: "Jane Smith"))
 
 5. **Quote**
     - Must have a **reference**.
-    - Must be sent on a **date**.
     - Must be proposed by a **Company**.
     - Must be proposed to a **Client**.
-    - Must have a **price**.
-    - Can concern a **Move** or a **Cleaning**.
+    - Can concern a **Move**.
     - Example: CREATE (q1:Quote (reference: "Q123", date: "2024-07-25", validUntil: "2024-08-25", amount: 1500)) CREATE (q1)-[:PROPOSED_BY]->(comp1:Company (name: "Moving Inc.")) CREATE (q1)-[:PROPOSED_TO]->(c1:Client (name: "John Doe")) CREATE (q1)-[:CONCERNS]->(m1:Move (category: "Standard", volume: 50))
 
-6. **Request**
-    - Must have a **reference**.
-    - Must be sent on a **date**.
-    - Must be made to a **Company**.
-    - Must be made by a **Client**.
-    - Can concern a **Move** or a **Cleaning**.
-    - Example: CREATE (r1:Request (reference: "R123", date: "2024-07-20")) CREATE (r1)-[:MADE_TO]->(comp1:Company (name: "Moving Inc.")) CREATE (r1)-[:MADE_BY]->(c1:Client (name: "John Doe")) CREATE (r1)-[:CONCERNS]->(m1:Move (category: "Standard", volume: 50))
-
-7. **Invoice**
+6. **Invoice**
     - Must have a **reference**.
     - Must be sent on a **date**.
     - Must be proposed by a **Company**.
@@ -270,173 +257,38 @@ To assist you further, here are the constraints for each class in detail:
     - Can concern a **Move** or a **Cleaning**.
     - Example: CREATE (i1:Invoice (reference: "I123", date: "2024-07-30", price: 2000)) CREATE (i1)-[:PROPOSED_BY]->(comp1:Company (name: "Moving Inc.")) CREATE (i1)-[:PROPOSED_TO]->(c1:Client (name: "John Doe")) CREATE (i1)-[:CONCERNS]->(m1:Move (category: "Standard", volume: 50))
 
-8. **Company**
+7. **Company**
     - Must have a **name**.
     - Can have an **address**, **phone**, **email**, **clients**, and **employees**.
     - Example: CREATE (comp1:Company (name: "Moving Inc.", phone: "123-456-7890", email: "info@movinginc.com")) CREATE (comp1)-[:HAS_ADDRESS]->(a1:Address (street: "123 Main St", postalCode: "12345", city: "Springfield"))
 
-9. **Move**
-    - Must belong to a **MovingType** (International/INT or National/NAT).
-    - Can have a **category** (ECO, STD, LUX, PREMIUM).
-    - Can include a **Service**.
-    - Must depart/load from at least one **Address** and arrive/unload at at least one **Address**.
-    - Must have a **volume**.
-    - Example: CREATE (m1:Move (type: "INT", category: "Standard", volume: 50)) CREATE (m1)-[:DEPARTS_LOADS_FROM]->(a1:Address (street: "123 Main St", postalCode: "12345", city: "Springfield")) CREATE (m1)-[:ARRIVES_UNLOADS_AT]->(a2:Address (street: "456 Elm St", postalCode: "67890", city: "Shelbyville"))
+8. **Move**
+    - Must belong to a **MovingCategory**.
+    - Can concern multiple **Addresses**.
+    - Can have a **volume**.
+    - Example: CREATE (m1:Move (category: "Standard", volume: 50)) CREATE (m1)-[:CONCERNS]->(a1:Address (street: "123 Main St", postalCode: "12345", city: "Springfield")) CREATE (m1)-[:CONCERNS]->(a2:Address (street: "456 Elm St", postalCode: "67890", city: "Shelbyville"))
 
-10. **Cleaning**
+9. **Cleaning**
     - Must have a **type**.
     - Can include a **Service**.
     - Must concern at least one **Address**.
     - Example: CREATE (cl1:Cleaning (type: "Deep Clean")) CREATE (cl1)-[:INCLUDES]->(s1:Service (name: "Carpet Cleaning")) CREATE (cl1)-[:CONCERNS]->(a1:Address (street: "123 Main St", postalCode: "12345", city: "Springfield"))
 
-11. **Employee**
+10. **Employee**
     - Must have a **name**.
     - Can have a **phone**.
     - Must work for a **Company**.
     - Example: CREATE (e1:Employee (name: "Jane Smith", phone: "123-456-7890")) CREATE (e1)-[:WORKS_FOR]->(comp1:Company (name: "Moving Inc."))
 
-12. **BankAccount**
-    - Must have a **bank** and **accountNumber**.
-    - Example: CREATE (b1:BankAccount (bank: "Postfinance", accountNumber: "CH69 0900 0000 1635 8280 8")) CREATE (b1)-[:BELONGS_TO]->(comp1:Company (name: "Moving Inc."))
-
-13. **Furniture**
-    - Can have **dimensions**.
-    - Can have a **volume**.
-    - Can be located at an **Address**.
-    - Example: CREATE (f1:Furniture (dimensions: "200x80x75 cm", volume: 1.2)) CREATE (f1)-[:LOCATED_AT]->(a1:Address (street: "123 Main St", postalCode: "12345", city: "Springfield"))
-
-## I. Example of a successful extraction in french
-
-
-1. **Adresses et villes**
-- **Correct**: 
-
-CREATE (a1:Adresse (rue: "123 Main St", ville: "Springfield")) 
-CREATE (a1)-[:LOCATED_IN]->(c1:Ville (nom: "Springfield", pays: "USA"))
-
-- **Incorrect**: 
-
-CREATE (a1:Adresse (rue: "123 Main St", ville: "Springfield")) 
-CREATE (c1:Ville (nom: "Springfield", pays: "USA"))
-
-
-2. **Client et Devis**
-- **Correct**: 
-
-CREATE (c1:Client (nom: "John Doe", tel: "123-456-7890", email: "john.doe@example.com")) 
-CREATE (q1:Devis (reference: "Q123", date: "2024-07-25", montant: 1500)) 
-CREATE (q1)-[:PROPOSE_PAR]->(comp1:Entreprise (nom: "Moving Inc.")) 
-CREATE (q1)-[:PROPOSE_A]->(c1) 
-CREATE (q1)-[:CONCERNE]->(m1:Demenagement (categorie: "Standard", volume: 50))
-
-- **Incorrect**: 
-
-CREATE (c1:Client (nom: "John Doe", tel: "123-456-7890", email: "john.doe@example.com")) 
-CREATE (q1:Devis (reference: "Q123", date: "2024-07-25", montant: 1500)) 
-CREATE (comp1:Entreprise (nom: "Moving Inc."))
-
-
-### Exemples d'extraction pour chaque classe
-
-1. **Adresse**
-
-CREATE (a1:Adresse (rue: "Rue de Livron 21", codePostal: "1217", ville: "Meyrin", type: "departure")) 
-CREATE (a1)-[:LOCATED_IN]->(v1:Ville (nom: "Meyrin", pays: "Suisse"))
-
-
-2. **Ville**
-
-CREATE (v1:Ville (nom: "Zurich", pays: "Suisse"))
-
-
-3. **Visite**
-
-CREATE (v1:Visite (date: "2024-07-25", statut: "Complétée")) 
-CREATE (v1)-[:PERFORMED_BY]->(e1:Employe (nom: "Jane Smith")) 
-CREATE (v1)-[:VISIT_OF]->(c1:Client (nom: "John Doe"))
-
-
-4. **Client**
-
-CREATE (c1:Client (nom: "John Doe", type: "Résidentiel")) 
-CREATE (c1)-[:REQUESTED]->(m1:Demenagement (categorie: "Standard", volume: 50)) 
-CREATE (c1)-[:MANAGED_BY]->(e1:Employe (nom: "Jane Smith"))
-
-
-5. **Devis**
-
-CREATE (q1:Devis (reference: "Q123", date: "2024-07-25", montant: 1500)) 
-CREATE (q1)-[:PROPOSE_PAR]->(comp1:Entreprise (nom: "Moving Inc.")) 
-CREATE (q1)-[:PROPOSE_A]->(c1:Client (nom: "John Doe")) 
-CREATE (q1)-[:CONCERNE]->(m1:Demenagement (categorie: "Standard", volume: 50))
-
-
-6. **Demande**
-
-CREATE (r1:Demande (reference: "R123", date: "2024-07-20")) 
-CREATE (r1)-[:MADE_TO]->(comp1:Entreprise (nom: "Moving Inc.")) 
-CREATE (r1)-[:MADE_BY]->(c1:Client (nom: "John Doe")) 
-CREATE (r1)-[:CONCERNE]->(m1:Demenagement (categorie: "Standard", volume: 50))
-
-
-7. **Facture**
-
-CREATE (i1:Facture (reference: "I123", date: "2024-07-30", montant: 2000)) 
-CREATE (i1)-[:PROPOSE_PAR]->(comp1:Entreprise (nom: "Moving Inc.")) 
-CREATE (i1)-[:PROPOSE_A]->(c1:Client (nom: "John Doe")) 
-CREATE (i1)-[:CONCERNE]->(m1:Demenagement (categorie: "Standard", volume: 50))
-
-
-8. **Entreprise**
-
-CREATE (comp1:Entreprise (nom: "Moving Inc.", tel: "123-456-7890", email: "info@movinginc.com")) 
-CREATE (comp1)-[:HAS_ADDRESS]->(a1:Adresse (rue: "123 Main St", codePostal: "12345", ville: "Springfield"))
-
-
-9. **Déménagement**
-
-CREATE (m1:Demenagement (type: "INT", categorie: "Standard", volume: 50)) 
-CREATE (m1)-[:DEPARTS_FROM]->(a1:Adresse (rue: "123 Main St", codePostal: "12345", ville: "Springfield")) 
-CREATE (m1)-[:ARRIVES_AT]->(a2:Adresse (rue: "456 Elm St", codePostal: "67890", ville: "Shelbyville"))
-
-
-10. **Nettoyage**
-
-CREATE (cl1:Nettoyage (type: "Nettoyage en profondeur")) 
-CREATE (cl1)-[:INCLUDES]->(s1:Service (nom: "Nettoyage de tapis")) 
-CREATE (cl1)-[:CONCERNE]->(a1:Adresse (rue: "123 Main St", codePostal: "12345", ville: "Springfield"))
-
-
-11. **Employé**
-
-CREATE (e1:Employe (nom: "Jane Smith", tel: "123-456-7890")) 
-CREATE (e1)-[:WORKS_FOR]->(comp1:Entreprise (nom: "Moving Inc."))
-
-
-12. **CompteBancaire**
-
-CREATE (b1:CompteBancaire (banque: "Postfinance", numeroDeCompte: "CH69 0900 0000 1635 8280 8")) 
-CREATE (b1)-[:BELONGS_TO]->(comp1:Entreprise (nom: "Moving Inc."))
-
-
-13. **Meuble**
-
-CREATE (f1:Meuble (dimensions: "200x80x75 cm", volume: 1.2)) 
-CREATE (f1)-[:LOCATED_AT]->(a1:Adresse (rue: "123 Main St", codePostal: "12345", ville: "Springfield"))
-
-
-### Exemple de Graphe Neo4J complet en 
-
-
-CREATE (v1:Ville (nom: "Zurich", pays: "Suisse"))
-CREATE (v2:Ville (nom: "Eindhoven", pays: "Pays-Bas"))
-CREATE (v3:Ville (nom: "Meyrin", pays: "Suisse"))
-CREATE (v4:Ville (nom: "Weißenfels", pays: "Allemagne"))
-CREATE (v5:Ville (nom: "Appeville-Annebault", pays: "France"))
-CREATE (v6:Ville (nom: "Wattwil", pays: "Suisse"))
-CREATE (v7:Ville (nom: "Les Breuleux", pays: "Suisse"))
-CREATE (v8:Ville (nom: "Peseux", pays: "Suisse"))
-CREATE (v9:Ville (nom: "Aarwangen", pays: "Suisse"))
+CREATE (v1:Ville (nom: "Zurich"))
+CREATE (v2:Ville (nom: "Eindhoven"))
+CREATE (v3:Ville (nom: "Meyrin"))
+CREATE (v4:Ville (nom: "Weißenfels"))
+CREATE (v5:Ville (nom: "Appeville-Annebault"))
+CREATE (v6:Ville (nom: "Wattwil"))
+CREATE (v7:Ville (nom: "Les Breuleux"))
+CREATE (v8:Ville (nom: "Peseux"))
+CREATE (v9:Ville (nom: "Aarwangen"))
 
 CREATE (a1:Adresse (rue: "Rue de Livron 21", ville: "Meyrin"))
 CREATE (a2:Adresse (rue: "Engelgasse", ville: "Wattwil"))
@@ -448,9 +300,7 @@ CREATE (a7:Adresse (rue: "", ville: "Eindhoven"))
 CREATE (a8:Adresse (rue: "", ville: "Appeville-Annebault"))
 
 CREATE (e1:Employe (nom: "Alex Pereira", tel: "+41 76 816 11 00", email: "info@vip-moving.ch"))
-CREATE (e2:Employe (nom: "Mr.
-
- Rodrigues", tel: "+41 79 924 53 27", email: "info@vip-moving.ch"))
+CREATE (e2:Employe (nom: "Mr. Rodrigues", tel: "+41 79 924 53 27", email: "info@vip-moving.ch"))
 
 CREATE (c1:Client (nom: "Mr. Hillmann Thomas", tel: "076 647 28 22", email: "thomashillmann754@gmail.com"))
 CREATE (c2:Client (nom: "Mme. Bieri Daniela", tel: "079 567 45 43", email: "daniela-bieri@bluewin.ch"))
@@ -466,25 +316,33 @@ CREATE (d2:Devis (num: 190, date: "2024-07-04", validite: "2024-01-23", montant:
 CREATE (dem1:Demande (num: 79, date: "2024-07-22", volume: 12, type: "Partiel"))
 CREATE (dem2:Demande (num: 11006597, date: "2024-07-21", volume: 29, type: "Complet"))
 
-CREATE (a1)-[:LOCATED_IN]->(v3)
-CREATE (a2)-[:LOCATED_IN]->(v6)
-CREATE (a3)-[:LOCATED_IN]->(v1)
-CREATE (a4)-[:LOCATED_IN]->(v8)
-CREATE (a5)-[:LOCATED_IN]->(v7)
-CREATE (a6)-[:LOCATED_IN]->(v9)
-CREATE (a7)-[:LOCATED_IN]->(v2)
-CREATE (a8)-[:LOCATED_IN]->(v5)
+CREATE (v1)-[:SITUE_DANS]->(v3)
+CREATE (v2)-[:SITUE_DANS]->(v4)
+CREATE (v5)-[:SITUE_DANS]->(v3)
+CREATE (v6)-[:SITUE_DANS]->(v5)
+CREATE (v7)-[:SITUE_DANS]->(v8)
+CREATE (v8)-[:SITUE_DANS]->(v3)
+CREATE (v9)-[:SITUE_DANS]->(v5)
 
-CREATE (e1)-[:WORKS_FOR]->(e2)
-CREATE (e2)-[:WORKS_FOR]->(e1)
+CREATE (a1)-[:SITUE_DANS]->(v3)
+CREATE (a2)-[:SITUE_DANS]->(v6)
+CREATE (a3)-[:SITUE_DANS]->(v1)
+CREATE (a4)-[:SITUE_DANS]->(v8)
+CREATE (a5)-[:SITUE_DANS]->(v7)
+CREATE (a6)-[:SITUE_DANS]->(v9)
+CREATE (a7)-[:SITUE_DANS]->(v2)
+CREATE (a8)-[:SITUE_DANS]->(v5)
 
-CREATE (c1)-[:REQUESTED]->(d1)
-CREATE (c2)-[:REQUESTED]->(d2)
-CREATE (c3)-[:REQUESTED]->(dem2)
-CREATE (c4)-[:REQUESTED]->(dem1)
-CREATE (c5)-[:REQUESTED]->(dem1)
-CREATE (c6)-[:REQUESTED]->(dem1)
-CREATE (c7)-[:REQUESTED]->(dem1)
+CREATE (e1)-[:TRAVAILLE_POUR]->(e2)
+CREATE (e2)-[:TRAVAILLE_POUR]->(e1)
+
+CREATE (c1)-[:A_DEMANDE]->(d1)
+CREATE (c2)-[:A_DEMANDE]->(d2)
+CREATE (c3)-[:A_DEMANDE]->(dem2)
+CREATE (c4)-[:A_DEMANDE]->(dem1)
+CREATE (c5)-[:A_DEMANDE]->(dem1)
+CREATE (c6)-[:A_DEMANDE]->(dem1)
+CREATE (c7)-[:A_DEMANDE]->(dem1)
 
 CREATE (d1)-[:CONCERNE]->(dem1)
 CREATE (d2)-[:CONCERNE]->(dem2)
@@ -496,26 +354,24 @@ CREATE (a4)-[:EST_ADRESSE_DE_DÉCHARGEMENT]->(d2)
 CREATE (a5)-[:EST_ADRESSE_DE_CHARGEMENT]->(dem2)
 CREATE (a6)-[:EST_ADRESSE_DE_DÉCHARGEMENT]->(dem2)
 
-CREATE (d1)-[:PROPOSE_PAR]->(e1)
-CREATE (d1)-[:PROPOSE_A]->(c1)
-CREATE (d2)-[:PROPOSE_PAR]->(e2)
-CREATE (d2)-[:PROPOSE_A]->(c2)
+CREATE (d1)-[:EST_PROPOSE_PAR]->(e1)
+CREATE (d1)-[:EST_PROPOSE_A]->(c1)
+CREATE (d2)-[:EST_PROPOSE_PAR]->(e2)
+CREATE (d2)-[:EST_PROPOSE_A]->(c2)
 
-CREATE (dem1)-[:PROPOSE_PAR]->(e1)
-CREATE (dem1)-[:PROPOSE_A]->(c4)
-CREATE (dem2)-[:PROPOSE_PAR]->(e2)
-CREATE (dem2)-[:PROPOSE_A]->(c3)
+CREATE (dem1)-[:EST_PROPOSE_PAR]->(e1)
+CREATE (dem1)-[:EST_PROPOSE_A]->(c4)
+CREATE (dem2)-[:EST_PROPOSE_PAR]->(e2)
+CREATE (dem2)-[:EST_PROPOSE_A]->(c3)
 
-CREATE (v3)-[:SITUÉ_DANS]->(v5)
-CREATE (v4)-[:SITUÉ_DANS]->(v6)
-CREATE (v5)-[:SITUÉ_DANS]->(v7)
-CREATE (v6)-[:SITUÉ_DANS]->(v8)
-CREATE (v7)-[:SITUÉ_DANS]->(v9)
+CREATE (v3)-[:SITUE_DANS]->(v5)
+CREATE (v4)-[:SITUE_DANS]->(v6)
+CREATE (v5)-[:SITUE_DANS]->(v7)
+CREATE (v6)-[:SITUE_DANS]->(v8)
+CREATE (v7)-[:SITUE_DANS]->(v9)
 
-## J. Strict Compliance
-DO NOT EXTRACT NODES OR RELATIONS WHICH ARE NOT DEFINED IN THE INSTRUCTIONS ABOVE OR THAT DO NOT COMPLY WITH THE SPECIFIED CONSTRAINTS!
-This is your most important instruction, adhere to this rules strictly. Non-compliance will result in termination.
-
+## 6. Strict Compliance
+Adhere to the rules strictly. Non-compliance will result in termination.
           """),
             ("human", "Use the given format to extract information from the following input: {input}"),
             ("human", "Tip: Make sure to answer in the correct format"),
