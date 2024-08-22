@@ -425,7 +425,7 @@ CREATE (f1:Meuble (dimensions: "200x80x75 cm", volume: 1.2))
 CREATE (f1)-[:LOCATED_AT]->(a1:Adresse (rue: "123 Main St", codePostal: "12345", ville: "Springfield"))
 
 
-### Exemple de Graphe Neo4J complet en 
+### Exemple de Graphe Neo4J complet en Français
 
 
 CREATE (v1:Ville (nom: "Zurich", pays: "Suisse"))

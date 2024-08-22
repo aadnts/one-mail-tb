@@ -13,6 +13,7 @@ __pycache__
 token*
 *.pickle
 neo4j_db/
+gmail/threads
 
 # C extensions
 *.so
